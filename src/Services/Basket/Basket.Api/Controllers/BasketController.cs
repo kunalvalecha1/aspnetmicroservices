@@ -34,6 +34,8 @@ namespace Basket.Api.Controllers
         [ProducesResponseType(typeof(ShoppingCart), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<ShoppingCart>> UpdateBasket([FromBody] ShoppingCart basket)
         {
+            //TODO: Connect Discount.Grpc for getting discount
+
             return Ok(await _repository.UpdateBasket(basket));
             //return CreatedAtRoute("GetProduct", new { id = product.Id }, product);
         }
