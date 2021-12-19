@@ -17,7 +17,7 @@ namespace Discount.Grpc.Services
         private readonly IDiscountRepository _repository;
         private readonly IMapper _mapper;
 
-        public DiscountService(ILogger logger, IDiscountRepository repository, IMapper mapper)
+        public DiscountService(ILogger<DiscountService> logger, IDiscountRepository repository, IMapper mapper)
         {
             _logger = logger;
             _repository = repository;
