@@ -5,6 +5,13 @@ using Catalog.Api.Entities;
 using Catalog.Api.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using Newtonsoft.Json;
+using System.Linq;
+using System.Text.Json;
+using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Catalog.Api.Controllers
 {
@@ -25,7 +32,15 @@ namespace Catalog.Api.Controllers
         [ProducesResponseType(typeof(IEnumerable<Product>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
+            _logger.LogInformation("Getting products");
             var products = await _repository.GetProducts();
+            //products.Select(x => { x.RequestParams = JsonConvert.DeserializeObject<Dictionary<string, object>>(BsonExtensionMethods.ToJson(x.RequestParamsJson)); return x; }).ToList();
+
+            products.ToList().ForEach(c => c.RequestParams = c.RequestParamsJson !=null ? JsonConvert.DeserializeObject<JObject>(BsonExtensionMethods.ToJson(c.RequestParamsJson)): null);
+
+            //     var bsonDoc = BsonExtensionMethods.ToJson(person.HobbiesBson);
+            //person.Hobbies = JsonConvert.DeserializeObject<Dictionary<string, object>>(bsonDoc);
+
             return Ok(products);
         }
 
@@ -58,6 +73,10 @@ namespace Catalog.Api.Controllers
         [ProducesResponseType(typeof(Product), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<Product>> CreateProduct([FromBody] Product product)
         {
+
+            var jsonDoc = JsonConvert.SerializeObject(product.RequestParams);
+            product.RequestParamsJson = BsonSerializer.Deserialize<BsonDocument>(jsonDoc);
+
             await _repository.CreateProduct(product);
             return CreatedAtRoute("GetProduct", new { id = product.Id }, product);
 
