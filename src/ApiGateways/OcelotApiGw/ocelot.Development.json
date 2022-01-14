@@ -12,11 +12,11 @@
       ],
       "UpstreamPathTemplate": "/Catalog",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT" ],
-      "FileCacheOptions": { "TtlSeconds": 30 },
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "IdentityApiKey",
-        "AllowedScopes": []
-      }
+      "FileCacheOptions": { "TtlSeconds": 30 }
+      //"AuthenticationOptions": {
+      //  "AuthenticationProviderKey": "IdentityApiKey",
+      //  "AllowedScopes": []
+      //}
     },
     {
       "DownstreamPathTemplate": "/api/v1/Catalog/{id}",
