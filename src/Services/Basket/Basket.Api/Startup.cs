@@ -11,9 +11,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using HealthChecks.UI.Client;
 
 namespace Basket.Api
 {
@@ -56,10 +59,19 @@ namespace Basket.Api
                 config.UsingRabbitMq((ctx, cfg) =>
                 {
                     cfg.Host(Configuration["EventBusSettings:HostAddress"]);
+                    cfg.UseHealthCheck(ctx);
                 });
             });
 
             services.AddMassTransitHostedService();
+
+            services.AddHealthChecks().AddRedis(
+                    Configuration.GetValue<string>("CacheSettings:ConnectionString"),
+                    "Redis Health",
+                    HealthStatus.Degraded
+                );
+
+
 
         }
 
@@ -75,11 +87,16 @@ namespace Basket.Api
 
             app.UseRouting();
 
-            app.UseAuthorization();
+            app.UseAuthorization(); 
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/hc", new HealthCheckOptions()
+                {
+                    Predicate = _ => true,
+                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                });
             });
         }
     }
