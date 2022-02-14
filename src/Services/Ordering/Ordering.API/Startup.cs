@@ -9,6 +9,9 @@ using Ordering.Infrastructure;
 using MassTransit;
 using EventBus.Messages.Common;
 using Ordering.API.EventBusConsumer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using HealthChecks.UI.Client;
+using Ordering.Infrastructure.Persistence;
 
 namespace Ordering.API
 {
@@ -54,6 +57,8 @@ namespace Ordering.API
             services.AddApplicationServices();
             services.AddInfrastructureServices(Configuration);
 
+            services.AddHealthChecks().AddDbContextCheck<OrderContext>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -73,7 +78,14 @@ namespace Ordering.API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/hc", new HealthCheckOptions()
+                {
+                    Predicate = _ => true,
+                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                });
             });
+
+           
         }
     }
 }
